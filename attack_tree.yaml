@@ -1,0 +1,71 @@
+title: (AWS RDS) Data in the DB is tampered
+
+facts:
+- aws_rds: DB is hosted in AWS
+  from:
+  - reality
+- admin_access: Admins can acceses the AWS account
+  from:
+  - reality
+- user_access: Users can access the web app
+  from:
+  - reality
+- web_app_insecure: The Web App Lambda has security vulns
+  from:
+  - user_access
+- emails: Emails can be sent to a Processing lambda
+  from:
+  - reality
+- email_content: Emails may contain malicious content
+  from:
+  - emails
+
+attacks:
+- db_del_accident: Admin accidentally deletes the DB
+  from:
+  - aws_admin_controls
+- insider_attack: Admin tampers with the DB
+  from:
+  - aws_admin_controls
+- sqli: Unauthorised SQL is executed against the DB
+  from:
+  - route_handling
+  - mal_parsed_content
+- db_misconfig: AWS RDS is accidentally exposed
+  from:
+  - aws_rds
+  - aws_admin_controls
+- mal_parsed_content: Parsed email content includes malicious payloads
+  from:
+  - av
+
+mitigations:
+- aws_admin_controls: (out of scope) AWS Admin Controls like MFA
+  from:
+  - admin_access
+- route_handling: Only certain routes or endpoints are permitted
+  from:
+  - web_app_insecure
+- av: Emails are scanned
+  from:
+  - email_content
+- orm: Use a standard ORM layer for DB calls
+  from:
+  - sqli
+- cloud_sec: (PROPOSED) Use cloud monitoring tech
+  from:
+  - db_misconfig
+
+
+goals:
+- rds_asset: Tamper with DB
+  from:
+  - cloud_sec
+  - orm
+  - insider_attack
+- rds_dos: DoS the DB
+  from:
+  - db_del_accident
+  - orm
+  - insider_attack
+
